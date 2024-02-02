@@ -4,10 +4,11 @@ from rest_framework.views import APIView
 from .models import Ad, Category
 from .serializers import AdListSerializer, AdDetailSerializer, ReviewCreateSerializer, CreateRatingSerializer, \
     CategoryListSerializer, CategoryDetailSerializer
-from .service import get_client_ip, AdFilter
+from .service import get_client_ip, AdFilter, PaginationAd
 from django.db import models
-from rest_framework import generics
+from rest_framework import generics, permissions
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
 
 
 class CategoryListView(generics.ListAPIView):
@@ -23,8 +24,12 @@ class CategoryDetailView(generics.RetrieveAPIView):
 
 class AdListView(generics.ListAPIView):
     serializer_class = AdListSerializer
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter)
+    search_fields = ['title', 'description']
     filterset_class = AdFilter
+    ordering_fields = ['title', 'published_date', 'description']
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, permissions.IsAdminUser]
+    pagination_class = PaginationAd
 
     def get_queryset(self):
         ads = Ad.objects.filter(draft=False).annotate(
@@ -38,10 +43,12 @@ class AdListView(generics.ListAPIView):
 class AdDetailView(generics.RetrieveAPIView):
     queryset = Ad.objects.filter(draft=False)
     serializer_class = AdDetailSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
 
 class ReviewCreateView(generics.CreateAPIView):
     serializer_class = ReviewCreateSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
 
 class AddStarRatingView(generics.CreateAPIView):
@@ -49,3 +56,4 @@ class AddStarRatingView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(ip=get_client_ip(self.request))
+

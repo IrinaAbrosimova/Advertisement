@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
-from ckeditor_uploader.widgets import CKEditorUploadingWidget
+from ckeditor_uploader.fields import RichTextUploadingField
 
 
 class Author(models.Model):
@@ -32,9 +32,9 @@ class Category(models.Model):
 class Ad(models.Model):
     author = models.ForeignKey(Author, on_delete=models.CASCADE, verbose_name='Автор')
     title = models.CharField(max_length=255, verbose_name='Название')
-    description = models.TextField(verbose_name='Описание')
+    description = RichTextUploadingField(verbose_name='Описание')
     created_date = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
-    modified_date = models.DateTimeField(blank=True, null=True, verbose_name='Дата изменения')
+    modified_date = models.DateTimeField(auto_now_add=True, verbose_name='Дата изменения')
     poster = models.ImageField(blank=True, null=True, verbose_name='Изображение', upload_to="media/ad")
     draft = models.BooleanField('Черновик', default=False)
     published_date = models.DateTimeField(blank=True, null=True, verbose_name='Дата публикации')
