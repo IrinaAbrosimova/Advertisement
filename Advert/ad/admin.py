@@ -30,7 +30,7 @@ class CategoryAdmin(admin.ModelAdmin):
 class ReviewInline(admin.TabularInline):
     model = Review
     extra = 1
-    readonly_fields = ("name", "email")
+    readonly_fields = ("text", "user")
 
 
 class MediaFileInline(admin.TabularInline):
@@ -46,7 +46,7 @@ class MediaFileInline(admin.TabularInline):
 
 @admin.register(Ad)
 class AdAdmin(admin.ModelAdmin):
-        list_display = ("title", "category", "poster", "draft")
+        list_display = ("id", "title", "category", "poster", "draft", "created_date", "modified_date")
         list_filter = ("category", "published_date")
         search_fields = ("title", "description", "category__name")
         inlines = [MediaFileInline, ReviewInline]
@@ -100,12 +100,6 @@ class AdAdmin(admin.ModelAdmin):
         get_image.short_description = "Изображение"
 
 
-@admin.register(Review)
-class ReviewAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "email", "parent", "ad", )
-    readonly_fields = ("name", "email")
-
-
 @admin.register(Rating)
 class RatingAdmin(admin.ModelAdmin):
     list_display = ("star", "ip")
@@ -122,17 +116,12 @@ class MediaFileAdmin(admin.ModelAdmin):
     get_image.short_description = "Изображение"
 
 
-@admin.register(Author)
-class AuthorAdmin(admin.ModelAdmin):
-    list_display = ("name", "user", "get_image")
-    readonly_fields = ("get_image",)
-
-    def get_image(self, obj):
-        return mark_safe(f'<img src={obj.image.url} width="50" height="60"')
-
-    get_image.short_description = "Изображение"
-
-
+admin.site.register(Author)
+# admin.site.register(Ad)
+# admin.site.register(Category)
+# admin.site.register(Review)
+# admin.site.register(Rating)
+# admin.site.register(MediaFile)
 admin.site.register(StarRating)
 admin.site.site_title = "MMORPG"
 admin.site.site_header = "MMORPG"

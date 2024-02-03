@@ -1,25 +1,26 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Ad, Category
+from .models import Ad, Category, Author
 from .serializers import AdListSerializer, AdDetailSerializer, ReviewCreateSerializer, CreateRatingSerializer, \
-    CategoryListSerializer, CategoryDetailSerializer
+    CategoryListSerializer, AdSerializer, AuthorSerializer
 from .service import get_client_ip, AdFilter, PaginationAd
 from django.db import models
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, viewsets
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters
+from rest_framework import filters, parsers
 
 
 class CategoryListView(generics.ListAPIView):
 
     queryset = Category.objects.all()
     serializer_class = CategoryListSerializer
+    pagination_class = PaginationAd
 
 
 class CategoryDetailView(generics.RetrieveAPIView):
     queryset = Category.objects.all()
-    serializer_class = CategoryDetailSerializer
+    serializer_class = CategoryListSerializer
 
 
 class AdListView(generics.ListAPIView):
@@ -28,7 +29,7 @@ class AdListView(generics.ListAPIView):
     search_fields = ['title', 'description']
     filterset_class = AdFilter
     ordering_fields = ['title', 'published_date', 'description']
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, permissions.IsAdminUser]
+
     pagination_class = PaginationAd
 
     def get_queryset(self):
@@ -43,12 +44,10 @@ class AdListView(generics.ListAPIView):
 class AdDetailView(generics.RetrieveAPIView):
     queryset = Ad.objects.filter(draft=False)
     serializer_class = AdDetailSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
 
 class ReviewCreateView(generics.CreateAPIView):
     serializer_class = ReviewCreateSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
 
 class AddStarRatingView(generics.CreateAPIView):
@@ -57,3 +56,26 @@ class AddStarRatingView(generics.CreateAPIView):
     def perform_create(self, serializer):
         serializer.save(ip=get_client_ip(self.request))
 
+
+class AdCreateView(generics.CreateAPIView):
+    serializer_class = AdSerializer
+
+
+class AdUpdateView(generics.UpdateAPIView):
+    queryset = Ad.objects.all()
+    serializer_class = AdSerializer
+
+
+class AdDeleteView(generics.DestroyAPIView):
+    queryset = Ad.objects.all()
+    serializer_class = AdSerializer
+
+
+class AuthorUpdateView(generics.UpdateAPIView):
+    queryset = Author.objects.all()
+    serializer_class = AuthorSerializer
+
+
+class AuthorDetailView(generics.RetrieveAPIView):
+    queryset = Author.objects.all()
+    serializer_class = AuthorSerializer
