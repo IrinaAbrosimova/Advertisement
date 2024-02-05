@@ -2,35 +2,28 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Ad, Category, Author, Review
-from .serializers import AdListSerializer, AdDetailSerializer, ReviewCreateSerializer, CreateRatingSerializer, \
-    CategoryListSerializer, AdSerializer, AuthorSerializer, ReviewSerializer
-from .service import get_client_ip, AdFilter, PaginationAd
+from .serializers import *
+from .service import get_client_ip, AdFilter, Pagination
 from django.db import models
 from rest_framework import generics, permissions, viewsets
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, parsers
 
 
-class CategoryListView(generics.ListAPIView):
-
+class CategoryView(generics.ListAPIView):
     queryset = Category.objects.all()
-    serializer_class = CategoryListSerializer
-    pagination_class = PaginationAd
-
-
-class CategoryDetailView(generics.RetrieveAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategoryListSerializer
+    serializer_class = CategorySerializer
+    pagination_class = Pagination
 
 
 class AdListView(generics.ListAPIView):
-    serializer_class = AdListSerializer
+    serializer_class = AdSerializer
     filter_backends = (DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter)
     search_fields = ['title', 'description']
     filterset_class = AdFilter
     ordering_fields = ['title', 'published_date', 'description']
-
-    pagination_class = PaginationAd
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    pagination_class = Pagination
 
     def get_queryset(self):
         ads = Ad.objects.filter(draft=False).annotate(
@@ -43,23 +36,8 @@ class AdListView(generics.ListAPIView):
 
 class AdDetailView(generics.RetrieveAPIView):
     queryset = Ad.objects.filter(draft=False)
-    serializer_class = AdDetailSerializer
-
-
-class ReviewCreateView(generics.CreateAPIView):
-    serializer_class = ReviewCreateSerializer
-
-
-class ReviewView(generics.ListAPIView):
-    queryset = Review.objects.all()
-    serializer_class = ReviewSerializer
-
-
-class AddStarRatingView(generics.CreateAPIView):
-    serializer_class = CreateRatingSerializer
-
-    def perform_create(self, serializer):
-        serializer.save(ip=get_client_ip(self.request))
+    serializer_class = AdSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class AdCreateView(generics.CreateAPIView):
@@ -84,3 +62,29 @@ class AuthorUpdateView(generics.UpdateAPIView):
 class AuthorDetailView(generics.RetrieveAPIView):
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
+
+
+class ReviewCreateView(generics.CreateAPIView):
+    serializer_class = ReviewCreateSerializer
+
+
+class ReviewView(generics.ListAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+
+
+class ReviewUpdateView(generics.UpdateAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewCreateSerializer
+
+
+class ReviewDeleteView(generics.DestroyAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+
+
+class AddStarRatingView(generics.CreateAPIView):
+    serializer_class = CreateRatingSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(ip=get_client_ip(self.request))

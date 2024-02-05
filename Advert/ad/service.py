@@ -4,7 +4,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
 
-class PaginationAd(PageNumberPagination):
+class Pagination(PageNumberPagination):
     page_size = 2
     max_page_size = 1000
 
@@ -39,3 +39,4 @@ class AdFilter(filters.FilterSet):
     class Meta:
         model = Ad
         fields = ['category', 'published_date']
+

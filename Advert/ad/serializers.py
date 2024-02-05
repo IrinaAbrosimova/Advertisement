@@ -2,6 +2,8 @@ from rest_framework import serializers, permissions
 
 from .models import Ad, Review, Rating, Category, Author
 from django.contrib.auth.models import User
+from django.core.mail import send_mail
+from .service import *
 
 
 class FilterReviewListSerializer(serializers.ListSerializer):
@@ -19,7 +21,7 @@ class RecursiveSerializer(serializers.Serializer):
 
 
 class ReviewCreateSerializer(serializers.ModelSerializer):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     class Meta:
         model = Review
@@ -32,7 +34,10 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = "__all__"
+        fields = ["text", "user", "draft", "ad", "children"]
+        extra_kwargs = {
+            'user': {'read_only': True},
+        }
 
 
 class UserReviewSerializer(serializers.ModelSerializer):
@@ -57,7 +62,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class AuthorSerializer(serializers.ModelSerializer):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     user = UserSerializer()
 
     class Meta:
@@ -65,56 +70,30 @@ class AuthorSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class CategoryListSerializer(serializers.ModelSerializer):
-    permission_classes = [permissions.IsAuthenticated]
+class CategorySerializer(serializers.ModelSerializer):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     class Meta:
         model = Category
         fields = ("id", "name", "image")
 
 
-class AdListSerializer(serializers.ModelSerializer):
-    permission_classes = [permissions.AllowAny]
-    rating_user = serializers.BooleanField()
-    middle_star = serializers.IntegerField()
-    category = CategoryListSerializer(read_only=True)
-    author = AuthorSerializer(read_only=True)
-
-    class Meta:
-        model = Ad
-        fields = ("id", "title", "category", "description", "author", "rating_user", "middle_star", "published_date")
-        extra_kwargs = {
-            'user': {'read_only': True}
-        }
-
-
 class AdSerializer(serializers.ModelSerializer):
-    category = CategoryListSerializer(read_only=True)
+    category = CategorySerializer(read_only=True)
     author = AuthorSerializer(read_only=True)
     reviews = ReviewSerializer(many=True)
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     class Meta:
         model = Ad
         fields = ("title", "category", "description", "author", "draft", "published_date", "created_date", "modified_date", "reviews")
         extra_kwargs = {
-            'user': {'read_only': True}
+            'user': {'read_only': True},
         }
 
 
-class AdDetailSerializer(serializers.ModelSerializer):
-    category = CategoryListSerializer(read_only=True)
-    author = AuthorSerializer(read_only=True)
-    reviews = ReviewSerializer(many=True)
-    permission_classes = [permissions.AllowAny]
-
-    class Meta:
-        model = Ad
-        fields = "__all__"
-
-
 class CreateRatingSerializer(serializers.ModelSerializer):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.AllowAny]
 
     class Meta:
         model = Rating
