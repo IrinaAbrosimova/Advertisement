@@ -20,7 +20,7 @@ class RecursiveSerializer(serializers.Serializer):
         return serializer.data
 
 
-class ReviewCreateSerializer(serializers.ModelSerializer):
+class ReviewSerializer(serializers.ModelSerializer):
     permission_classes = [permissions.AllowAny]
 
     class Meta:
@@ -28,7 +28,7 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class ReviewSerializer(serializers.ModelSerializer):
+class ReviewViewSerializer(serializers.ModelSerializer):
     children = RecursiveSerializer(many=True)
     permission_classes = [permissions.AllowAny]
 
@@ -53,7 +53,7 @@ class UserReviewSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserPreviewSerializer(serializers.ModelSerializer):
     review_user = UserReviewSerializer(many=True)
 
     class Meta:
@@ -61,9 +61,24 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ["id", "username", "first_name", "last_name", "email", "date_joined", "review_user"]
 
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "username", "first_name", "last_name", "email"]
+
+
 class AuthorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Author
+        fields = "__all__"
+        extra_kwargs = {
+            'user': {'read_only': True},
+        }
+
+
+class AuthorViewSerializer(serializers.ModelSerializer):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    user = UserSerializer()
+    user = UserPreviewSerializer(read_only=True)
 
     class Meta:
         model = Author
@@ -81,14 +96,14 @@ class CategorySerializer(serializers.ModelSerializer):
 class AdSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     author = AuthorSerializer(read_only=True)
-    reviews = ReviewSerializer(many=True)
+    reviews = ReviewSerializer(many=True, read_only=True)
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     class Meta:
         model = Ad
         fields = ("title", "category", "description", "author", "draft", "published_date", "created_date", "modified_date", "reviews")
         extra_kwargs = {
-            'user': {'read_only': True},
+            'user': {'read_only': True}
         }
 
 

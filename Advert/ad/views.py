@@ -61,21 +61,21 @@ class AuthorUpdateView(generics.UpdateAPIView):
 
 class AuthorDetailView(generics.RetrieveAPIView):
     queryset = Author.objects.all()
-    serializer_class = AuthorSerializer
+    serializer_class = AuthorViewSerializer
 
 
 class ReviewCreateView(generics.CreateAPIView):
-    serializer_class = ReviewCreateSerializer
+    serializer_class = ReviewSerializer
 
 
 class ReviewView(generics.ListAPIView):
     queryset = Review.objects.all()
-    serializer_class = ReviewSerializer
+    serializer_class = ReviewViewSerializer
 
 
 class ReviewUpdateView(generics.UpdateAPIView):
     queryset = Review.objects.all()
-    serializer_class = ReviewCreateSerializer
+    serializer_class = ReviewSerializer
 
 
 class ReviewDeleteView(generics.DestroyAPIView):
