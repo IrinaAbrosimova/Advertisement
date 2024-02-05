@@ -94,7 +94,7 @@ WSGI_APPLICATION = 'ad_conf.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'Advertisement',
+        'NAME': 'Advert',
         'USER': 'postgres',
         'PASSWORD': '123456',
         'HOST': 'localhost',

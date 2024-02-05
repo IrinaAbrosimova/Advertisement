@@ -4,7 +4,7 @@ from ckeditor_uploader.fields import RichTextUploadingField
 
 
 class Author(models.Model):
-    bio = models.CharField(max_length=255)
+    bio = models.CharField(max_length=255, blank=True, null=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     image = models.ImageField(blank=True, null=True, verbose_name='Изображение', upload_to="media/author")
     phone = models.CharField(max_length=13, blank=True, null=True, verbose_name='Телефон')
@@ -97,7 +97,7 @@ class Rating(models.Model):
 
 
 class Review(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь', related_name="review_user")
     text = models.TextField("Сообщение", max_length=5000)
     draft = models.BooleanField('Не опубликован', default=True)
     parent = models.ForeignKey(

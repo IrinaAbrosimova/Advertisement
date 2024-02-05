@@ -1,9 +1,9 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Ad, Category, Author
+from .models import Ad, Category, Author, Review
 from .serializers import AdListSerializer, AdDetailSerializer, ReviewCreateSerializer, CreateRatingSerializer, \
-    CategoryListSerializer, AdSerializer, AuthorSerializer
+    CategoryListSerializer, AdSerializer, AuthorSerializer, ReviewSerializer
 from .service import get_client_ip, AdFilter, PaginationAd
 from django.db import models
 from rest_framework import generics, permissions, viewsets
@@ -48,6 +48,11 @@ class AdDetailView(generics.RetrieveAPIView):
 
 class ReviewCreateView(generics.CreateAPIView):
     serializer_class = ReviewCreateSerializer
+
+
+class ReviewView(generics.ListAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
 
 
 class AddStarRatingView(generics.CreateAPIView):
