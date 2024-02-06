@@ -71,6 +71,7 @@ class ReviewCreateView(generics.CreateAPIView):
 class ReviewView(generics.ListAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewViewSerializer
+    pagination_class = Pagination
 
 
 class ReviewUpdateView(generics.UpdateAPIView):

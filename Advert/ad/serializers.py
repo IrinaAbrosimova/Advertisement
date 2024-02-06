@@ -61,19 +61,53 @@ class UserPreviewSerializer(serializers.ModelSerializer):
         fields = ["id", "username", "first_name", "last_name", "email", "date_joined", "review_user"]
 
 
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ["id", "username", "first_name", "last_name", "email"]
-
-
 class AuthorSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False)
+
     class Meta:
         model = Author
-        fields = "__all__"
-        extra_kwargs = {
-            'user': {'read_only': True},
-        }
+        fields = ["id", "user", "bio", "image", "phone", "vk", "telegram", "whatsup"]
+        read_only_fields = ('user',)
+
+
+class UserSerializer(serializers.ModelSerializer):
+    authors = AuthorSerializer(many=True)
+
+    class Meta:
+        model = User
+        fields = ["id", "username", "first_name", "last_name", "email", "authors"]
+        read_only_fields = ["email"]
+
+    # def create(self, validated_data):
+    #     authors = validated_data.pop('authors')
+    #     user = User.objects.create(**validated_data)
+    #     for author in authors:
+    #         Author.objects.create(**author, user=user)
+    #     return user
+
+    def update(self, instance, validated_data):
+        authors = validated_data.pop('authors')
+        instance.username = validated_data.get("username", instance.username)
+        instance.save()
+        keep_authors = []
+        for author in authors:
+            if "id" in author.keys():
+                if Author.objects.filter(id=author["id"]).exists():
+                    c = Author.objects.get(id=author["id"])
+                    c.username = author.get('username', c.username)
+                    c.save()
+                    keep_authors.append(c.id)
+                else:
+                    continue
+            else:
+                c = Author.objects.create(**author, user=instance)
+                keep_authors.append(c.id)
+
+        for author in instance.authors:
+            if author.id not in keep_authors:
+                author.delete()
+
+        return instance
 
 
 class AuthorViewSerializer(serializers.ModelSerializer):
@@ -82,7 +116,7 @@ class AuthorViewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Author
-        fields = "__all__"
+        fields = ["image", "bio", "image", "phone", "vk", "telegram", "whatsup", "user"]
 
 
 class CategorySerializer(serializers.ModelSerializer):
