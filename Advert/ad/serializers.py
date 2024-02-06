@@ -87,8 +87,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         authors = validated_data.pop('authors')
-        instance.username = validated_data.get("username", instance.username)
-        instance.save()
+        users = validated_data.pop('users')
+
         keep_authors = []
         for author in authors:
             if "id" in author.keys():
@@ -107,6 +107,8 @@ class UserSerializer(serializers.ModelSerializer):
             if author.id not in keep_authors:
                 author.delete()
 
+        instance.username = validated_data.get("username", instance.username)
+        instance.save()
         return instance
 
 
@@ -117,6 +119,7 @@ class AuthorViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Author
         fields = ["image", "name", "phone", "vk", "telegram", "whatsup", "user"]
+
 
 
 class CategorySerializer(serializers.ModelSerializer):
