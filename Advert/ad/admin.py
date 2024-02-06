@@ -102,7 +102,7 @@ class AdAdmin(admin.ModelAdmin):
 
 @admin.register(Author)
 class AuthorAdmin(admin.ModelAdmin):
-    list_display = ("id", "bio", "get_image")
+    list_display = ("id", "name", "get_image")
     readonly_fields = ("get_image",)
 
     def get_image(self, obj):

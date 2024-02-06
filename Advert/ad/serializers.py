@@ -66,7 +66,7 @@ class AuthorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Author
-        fields = ["id", "user", "bio", "image", "phone", "vk", "telegram", "whatsup"]
+        fields = ["id", "user", "name", "image", "phone", "vk", "telegram", "whatsup"]
         read_only_fields = ('user',)
 
 
@@ -116,7 +116,7 @@ class AuthorViewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Author
-        fields = ["image", "bio", "image", "phone", "vk", "telegram", "whatsup", "user"]
+        fields = ["image", "name", "phone", "vk", "telegram", "whatsup", "user"]
 
 
 class CategorySerializer(serializers.ModelSerializer):
